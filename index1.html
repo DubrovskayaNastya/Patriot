@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="unnamed.png" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Витебский государственный технологический колледж</title>
+        
+        <link rel="stylesheet" href="index1.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"/>
+    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script> <!-- Слайдер Swiper -->
+    
+        <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+        <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/dist/face-api.min.js"></script>
+    
+        <script defer src="index1.js"></script>  
+        <script defer src="calendar.js"></script>
+    </head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="unnamed.png" alt="Логотип" class="logo">
+            <a class="fixed-text" style=" top: 27px; ">Филиал учреждения образования </a>
+                 <a class="fixed-text"  style=" top: 50px; ">"Белорусский государственныйтехнологический университет" </a>
+                 <a class="fixed-text"  style=" top: 74px; ">"Витебский государственный технологический колледж"</a>
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Поиск..." autocomplete="off">
+                <ul id="suggestions-list" class="suggestions-list"></ul>
+            </div>
+            
+        </div>
+
+        <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+        <nav class="menu" style="z-index: 100;" id="menu">
+            <div class="close-btn" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+            </div>
+            <a href="./index1.html">Главная</a>
+            <a href="./index3.html">Доска почета</a>
+            <a href="#" class="open-modal">Подать заявку</a>
+        </nav>
+<div class="modal-overlay"></div>
+
+<form id="application-form">
+<div class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+       
+        
+        <div class="form-group">
+            <label for="name">ФИО:</label>
+            <input type="text" id="name" name="name" placeholder="Введите ваше ФИО" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="group">Группа:</label>
+            <input type="text" id="group" name="group" placeholder="Введите вашу группу" autocomplete="organization" required>
+        </div>
+
+        <div class="form-group">
+            <label for="direction">Выберите направление:</label>
+            <select id="direction" name="direction" autocomplete="off" required>
+                <option value="МКЦ">МКЦ</option>
+                <option value="Спорт">Спорт</option>
+                <option value="МООП">МООП</option>
+                <option value="Волонтёры">Волонтёры</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="email">Ваша почта:</label>
+            <input type="email" id="email" name="email" placeholder="Введите ваш email" required>
+        </div>
+        <button class="submit" type="submit" >Отправить</button>
+    </div>
+</div>
+</form>
+
+        <div id="calendar-container">
+            <div id="calendar"></div>
+        </div>
+
+        <div id="event-details">
+            <div class="sl">
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+        </div>
+        <div id="recognized-faces"></div>
+
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+</div>
+        </div>
+    </div>
+<div id="images"></div>
+
+<script type="text/javascript">
+   (function(){
+      emailjs.init("9ihRsTxjHpPhSTvWl"); 
+   })();
+
+   document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.querySelector(".modal");
+        const openBtn = document.querySelector(".open-modal");
+        const closeBtn = document.querySelector(".close-modal");
+        const form = document.querySelector("#application-form");
+
+        openBtn.addEventListener("click", function () {
+            modal.classList.add("active");
+        });
+
+        closeBtn.addEventListener("click", function () {
+            modal.classList.remove("active");
+        });
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const group = document.getElementById("group").value;
+            const direction = document.getElementById("direction").value;
+            const email = document.getElementById("email").value;
+
+            try {
+                await sendEmail(name, group, direction, email);
+
+                modal.classList.remove("active");
+                form.reset();
+
+                alert("Заявка успешно отправлена!");
+            } catch (error) {
+                console.error("Ошибка при отправке заявки:", error);
+                alert("Ошибка при отправке заявки!");
+            }
+        });
+
+        async function sendEmail(name, group, direction, email) {
+            try {
+                const templateParams = {
+                    user_name: name,
+                    user_group: group,
+                    user_direction: direction,
+                    user_email: email,
+                    admin_email: "dubrovskayan8@gmail.com" 
+                };
+
+                const response = await emailjs.send("service_5b67909", "template_9wn9hkq", templateParams);
+
+                console.log("Email отправлен успешно:", response);
+                return response;
+            } catch (error) {
+                console.error("Ошибка при отправке email через EmailJS:", error);
+                if (error.status) {
+                    console.error("HTTP статус ошибки:", error.status);
+                    console.error("Сообщение ошибки:", error.text);
+                }
+                throw error;
+            }
+        }
+    });
+</script>
+
+    <script type="module" src="server.mjs"></script>
+</body>
+</html>

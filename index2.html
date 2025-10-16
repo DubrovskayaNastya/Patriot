@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация</title>
+    <link rel="stylesheet" href="index1.css">
+    <style>
+        client-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .client-image {
+            width: 420px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-right: 20px;
+            position: absolute;
+            top:250px;
+            left:45px;
+        }
+
+        .client-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .client-info h2 {
+            position: absolute;
+            left: 80%;
+            top:25%;
+            margin: 0;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .client-info p {
+            position: absolute;
+            width: 1251px;
+            top:490px;
+            left:550px;
+            font-size: 22px;
+            color: #555;
+            text-align: justify;
+            line-height: 1.8;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .client-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .client-image {
+                margin: 0 auto 15px;
+            }
+        }
+    </style>
+            <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+</head>
+<body>
+        <div class="container">
+            <div class="header">
+                <img src="unnamed.png" alt="Логотип" class="logo">
+                 <a class="fixed-text" style=" top: 27px; ">Филиал учреждения образования </a>
+                 <a class="fixed-text"  style=" top: 50px; ">"Белорусский государственныйтехнологический университет" </a>
+                 <a class="fixed-text"  style=" top: 74px; ">"Витебский государственный технологический колледж"</a>
+                <div class="burger" onclick="toggleMenu()">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+    
+            <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+            <nav class="menu" style="z-index: 100;" id="menu">
+                <div class="close-btn" onclick="toggleMenu()">
+                    <div></div>
+                    <div></div>
+                </div>
+                <a href="./index1.html">Главная</a>
+                <a href="./index3.html">Доска почета</a>
+                <a href="#" class="open-modal">Подать заявку</a>
+            </nav>
+            
+    <div class="modal-overlay"></div>
+    
+    <form id="application-form">
+    <div class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+           
+            
+            <div class="form-group">
+                <label for="name">ФИО:</label>
+                <input type="text" id="name" name="name" placeholder="Введите ваше ФИО" autocomplete="name" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="group">Группа:</label>
+                <input type="text" id="group" name="group" placeholder="Введите вашу группу" autocomplete="organization" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="direction">Выберите направление:</label>
+                <select id="direction" name="direction" autocomplete="off" required>
+                    <option value="МКЦ">МКЦ</option>
+                    <option value="Спорт">Спорт</option>
+                    <option value="МООП">МООП</option>
+                    <option value="Волонтёры">Волонтёры</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="email">Ваша почта:</label>
+                <input type="email" id="email" name="email" placeholder="Введите ваш email" required>
+            </div>
+            <button class="submit" type="submit" >Отправить</button>
+        </div>
+    </div>
+    </form>
+        <div id="clientDetails">
+        </div>
+        
+    <div class="client-info">
+    </div>
+    <script>
+       const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('clientId');
+
+        if (!clientId) {
+            document.getElementById('clientDetails').innerHTML = "<p class='error-message'>Клиент не найден.</p>";
+        } else {
+            async function loadClientDetails(clientId) {
+                try {
+                    const response = await fetch(`/clients/${clientId}`);
+                    const client = await response.json();
+
+                    if (!client || response.status === 404) {
+                        document.getElementById('clientDetails').innerHTML = "<p class='error-message'>Клиент не найден.</p>";
+                        return;
+                    }
+
+                    document.getElementById('clientDetails').innerHTML = `
+                        <div class="client-container">
+                            <img src="${client.image}" alt="Фото клиента" class="client-image">
+                            <div class="client-info">
+                                <h2>${client.name}</h2>
+                                <p style=" position: absolute;left: 29%;top:32%;margin: 0;font-size: 25px;"><strong>Группа:</strong> ${client.group_cl}</p>
+                                <p><strong></strong> ${client.about || 'Нет информации'}</p>
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Ошибка при загрузке данных клиента:', error);
+                    document.getElementById('clientDetails').innerHTML = "<p class='error-message'>Ошибка загрузки данных.</p>";
+                }
+            }
+
+            loadClientDetails(clientId);
+        }
+    </script>
+    <script type="text/javascript">
+        (function(){
+           emailjs.init("9ihRsTxjHpPhSTvWl"); 
+        })();
+     
+        document.addEventListener("DOMContentLoaded", function () {
+             const modal = document.querySelector(".modal");
+             const openBtn = document.querySelector(".open-modal");
+             const closeBtn = document.querySelector(".close-modal");
+             const form = document.querySelector("#application-form");
+     
+             openBtn.addEventListener("click", function () {
+                 modal.classList.add("active");
+             });
+     
+             closeBtn.addEventListener("click", function () {
+                 modal.classList.remove("active");
+             });
+     
+             form.addEventListener("submit", async function (event) {
+                 event.preventDefault();
+     
+                 const name = document.getElementById("name").value;
+                 const group = document.getElementById("group").value;
+                 const direction = document.getElementById("direction").value;
+                 const email = document.getElementById("email").value;
+     
+                 try {
+                     await sendEmail(name, group, direction, email);
+     
+                     modal.classList.remove("active");
+                     form.reset();
+     
+                     alert("Заявка успешно отправлена!");
+                 } catch (error) {
+                     console.error("Ошибка при отправке заявки:", error);
+                     alert("Ошибка при отправке заявки!");
+                 }
+             });
+     
+             async function sendEmail(name, group, direction, email) {
+                 try {
+                     const templateParams = {
+                         user_name: name,
+                         user_group: group,
+                         user_direction: direction,
+                         user_email: email,
+                         admin_email: "dubrovskayan8@gmail.com" 
+                     };
+     
+                     const response = await emailjs.send("service_5b67909", "template_9wn9hkq", templateParams);
+     
+                     console.log("Email отправлен успешно:", response);
+                     return response;
+                 } catch (error) {
+                     console.error("Ошибка при отправке email через EmailJS:", error);
+                     if (error.status) {
+                         console.error("HTTP статус ошибки:", error.status);
+                         console.error("Сообщение ошибки:", error.text);
+                     }
+                     throw error;
+                 }
+             }
+         });
+     </script>
+     <script>
+        function toggleMenu() {
+    var menu = document.getElementById("menu");
+    var overlay = document.getElementById("overlay");
+    
+    menu.classList.toggle("show");
+    overlay.classList.toggle("show");
+  }
+  
+  document.getElementById("search")?.addEventListener("keyup", function() {
+    let filter = this.value.toLowerCase();
+    let items = document.querySelectorAll(".list li");
+  
+    items.forEach(item => {
+      if (item.textContent.toLowerCase().includes(filter)) {
+        item.classList.remove("hidden");
+      } else {
+        item.classList.add("hidden");
+      }
+    });
+  });
+     </script>
+    <script type="module" src="server.mjs"></script>
+</body>
+</html>
